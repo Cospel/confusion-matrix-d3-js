@@ -1,30 +1,31 @@
 const d3 = require('d3');
 
 function heatmap() {
-    const boxSize = 30;
     const boxBorderColor = '#FFFFFF';
     const boxBorderSize = 2;
-    const daysHuman = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+    const daysHuman = ['test', 'dog', 'elephant'];
+    const hoursHuman = daysHuman;
     const dayLabelWidth = 30;
-    const hoursHuman = [
-        '00h', '01h', '02h', '03h', '04h', '05h', '06h', '07h', '08h',
-        '09h', '10h', '11h', '12h', '13h', '14h', '15h', '16h', '17h',
-        '18h', '19h', '20h', '21h', '22h', '23h'
-    ];
+    const width = 200;
+    const height = 200;
+    const boxSize = ((width-40)/daysHuman.length) - 2;
     const hourLabelHeight = 20;
     const boxInitialColor = '#BBBBBB';
     const animationDuration = 2000;
 
     // Configurable properties
     let colorSchema = [
+        //'#ffd8d4',
+        //'#ff584c',
+        //'#9c1e19',
+
+        '#BBBBBB',
         '#C0FFE7',
         '#95F6D7',
         '#6AEDC7',
         '#59C3A3',
         '#479980'
     ];
-    let width = 800;
-    let height = 400;
     let margin = {
         top: 30,
         right: 10,
@@ -50,9 +51,9 @@ function heatmap() {
 
             buildScales();
             buildSVG(this);
-            drawBoxes();
             drawDayLabels();
             drawHourLabels();
+            drawBoxes();
         });
     }
 
@@ -100,6 +101,7 @@ function heatmap() {
     function drawBoxes() {
         boxes = svg.select('.chart-group').selectAll('.box').data(data);
 
+        // draw boxes
         boxes.enter()
           .append('rect')
             .classed('box', true)
@@ -116,6 +118,44 @@ function heatmap() {
             .style('fill', function (d) { return colorScale(d[2]); })
             .style('opacity', 1);
 
+        console.log('test new 8');
+        // show the text of value above the cell
+        svg.selectAll('rect').on('mouseover', function(d) {
+            // get the position of the clicked cell
+            var xPos = parseFloat(d3.select(this).attr('x'));
+            var yPos = parseFloat(d3.select(this).attr('y'));
+            d3.select(this).style('stroke', 'black');
+            console.log(xPos, yPos);
+
+            // draw boxes
+            svg.select('.chart-group').append('rect')
+                    .attr({
+                        'class': 'tooltip',
+                        'x': xPos + 10,
+                        'y': yPos - 30,
+                        'width': 40,
+                        'height': 20,
+                        'fill': 'rgba(200, 200, 200, 0.5)',
+                        'stroke': 'yellow'
+                    });
+
+            // draw text value above drawed box
+            svg.select('.chart-group').append('text')
+                    .attr({
+                        'class': 'tooltip',
+                        'x': xPos + 30,
+                        'y': yPos - 15,
+                        'text-anchor': 'middle',
+                        'font-family': 'sans-serif',
+                        'font-size': '14px',
+                        'font-weight': 'bold',
+                        'fill': 'black'
+                    })
+                    .text(d3.format('.2f')(0.4212));
+
+        }).on('mouseout', function(d) {
+            d3.select(this).style('stroke', boxBorderColor);
+        });
         boxes.exit().remove();
     }
 
