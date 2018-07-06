@@ -1,11 +1,11 @@
 @font-face {
-    font-family: 'Karla', sans-serif;
-    src: url("https://fonts.googleapis.com/css?family=Karla") format("opentype");
+    font-family: 'BentonSans', sans-serif;
+    src: url("BentonSansLightRegular.otf") format("opentype");
     font-weight: 300;
 }
 
 body, html {
-    font-family: 'Karla', sans-serif;
+    font-family: 'Roboto', sans-serif;
     -webkit-font-smoothing: antialiased;
 }
 

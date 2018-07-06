@@ -2,22 +2,281 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>D3 Confusion/Correlation Matrix</title>
+    <title>D3 Confusion Matrix</title>
     <meta name="description" content="D3 Heatmap Demo">
     <meta name="author" content="Marcos Iglesias">
-
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Roboto">
     <link rel="stylesheet" href="src/css/styles.css">
 </head>
 <body>
     <main>
         <header>
-            <h1>Confusion/Correlation Matrix</h1>
+            <h1>Confusion Matrix</h1>
             <p>Initial implementation for vize.ai</p>
         </header>
         <section>
             <div class="container"></div>
         </section>
     </main>
-    <script src="dist/bundle.js"></script>
+    <script>
+        size1 = Math.floor(Math.random() * 10)+2;
+        var data = [];
+        for (i = 0; i < size1; i++) {
+            for (j = 0; j < size1; j++) {
+                data.push([0, 0, 0])
+                data[data.length-1][0] = i; // index i in confusion matrix
+                data[data.length-1][1] = j; // index j
+                data[data.length-1][2] = Math.random(); //  value in the matrix
+            }
+        }
+
+function heatmap(w, h, bgColor, cSchema, haslegend, labs) {
+    const boxBorderColor = '#FFFFFF';
+    const boxBorderSize = 3;
+    const backgroundColor = bgColor;
+    var labels = labs;
+    const width = w;
+    const height = h;
+    const boxSize_h = ((height)/labels.length) - 2;
+    const boxSize_w = ((width)/labels.length) - 2;
+    const boxInitialColor = '#BBBBBB';
+    const animationDuration = 300;
+    const legend = haslegend;
+
+    // Configurable properties
+    let colorSchema = cSchema;
+    let margin = {
+        top: 30, right: 60, bottom: 0, left: 30
+    };
+
+    let svg;
+    let data;
+    let colorScale;
+    let boxes;
+
+    function exports(_selection) {
+        _selection.each(function(_data) {
+            data = _data;
+
+            buildScales();
+            buildSVG(this);
+            drawBoxes();
+        });
+    }
+
+    function buildContainerGroups() {
+        background = svg.append("rect")
+                        .attr("width", "100%")
+                        .attr("height", "100%")
+                        .attr("fill", backgroundColor);
+
+        let container = svg
+              .append('g')
+                .classed('container-group', true)
+                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+                .attr('width', width)
+                .attr('height',  height);
+
+        if (legend) {
+            legend1 = container
+                .append('g')
+                .classed('legend', true);
+
+            for (i = 1; i < colorSchema.length - 1; i++) {
+                legend1.append('circle')
+                    .attr('cx', margin.left / 3 + width)
+                    .attr('cy', 25 * i)
+                    .attr('r', 4)
+                    .style('fill', colorSchema[i]);
+
+                legend1.append('text').text(i / (colorSchema.length - 1) * 100).classed('legendtext', true)
+                    .attr('x', margin.left / 3 + width + 25)
+                    .attr('y', (25 * i) + 5)
+                    .attr('font-size', '14px')
+                    .attr('text-anchor', 'middle')
+                    .attr('dominant-baseline', 'midle');
+            }
+        }
+
+        container
+          .append('g')
+            .classed('chart-group', true);
+
+        container
+          .append('g')
+            .classed('metadata-group', true);
+
+    }
+
+    function buildScales() {
+        colorScale = d3.scaleLinear()
+                .range([colorSchema[0], colorSchema[colorSchema.length-1]])
+                .domain(d3.extent(data, function (d) { return d[2] }))
+                .interpolate(d3.interpolateHslLong);
+    }
+
+    function buildSVG(container) {
+        if (!svg) {
+            svg = d3.select(container)
+                  .append('svg')
+                    .classed('heatmap', true);
+
+            buildContainerGroups();
+        }
+
+        svg
+            .attr('width', width + margin.left + margin.right)
+            .attr('height',  height + margin.top + margin.bottom);
+    }
+
+    d3.selection.prototype.moveUp = function() {
+        return this.each(function() {
+            this.parentNode.appendChild(this);
+        });
+    };
+
+    function drawBoxes() {
+        boxes = svg.select('.chart-group').selectAll('.box').data(data);
+
+        // draw boxes
+        boxes.enter()
+          .append('rect')
+            .classed('box', true)
+            .attr('width', boxSize_w)
+            .attr('height', boxSize_h)
+            .attr('x', function (d) { return d[1] * boxSize_w; })
+            .attr('y', function (d) { return d[0] * boxSize_h; })
+            .style('opacity', 0.2)
+            .style('fill', boxInitialColor)
+            .style('stroke', boxBorderColor)
+            .style('stroke-width', boxBorderSize)
+            .style('z-index', 0)
+            .transition()
+            .duration(animationDuration)
+            .style('fill', function (d) { return colorScale(d[2]); })
+            .style('opacity', 1);
+
+        console.log('test new 8');
+        // show the text of value above the cell
+        svg.selectAll('.box').on('mouseover', function(d) {
+            // get the position of the clicked cell
+            var xPos = parseFloat(d3.select(this).attr('x'));
+            var yPos = parseFloat(d3.select(this).attr('y'));
+
+            // move the cell to the front and make transition with stroke
+            d3.select(this).moveUp();
+            d3.select(this).transition()
+            .duration(animationDuration).style('stroke', 'white')
+                          .style('stroke-width', boxBorderSize+5);
+
+            // show label on x and y axis
+            svg.append('text').text(labels[d[1]]).classed('corrlabelx', true)
+                .attr('x', margin.left + width/2)
+                .attr('y', margin.top/2)
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'midle');
+
+            svg.append('text').text(labels[d[0]]).classed('corrlabely', true)
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'midle')
+                .attr('transform', 'translate('+margin.left/2+','+(+height/2+margin.top)+') rotate(270)');
+
+        }).on("mousemove", function(d)
+            {
+                coordinates = d3.mouse(this);
+                var x = coordinates[0];
+                var y = coordinates[1];
+                d3.selectAll('.tooltip').remove();
+
+                svg.append('rect').classed('tooltip', true)
+                .attr('x', x + 10 + margin.left)
+                .attr('y', y - 30 + margin.top)
+                .attr('width', 40)
+                .attr('height', 20)
+                .attr('fill', 'rgba(200, 200, 200, 0.5)')
+                .attr('stroke', 'black');
+
+                svg.append('text').classed('tooltip', true)
+                .attr('x', x + 30 + margin.left)
+                .attr('y', y - 15 + margin.top)
+                .attr('text-anchor','middle')
+                .attr('fill', 'black')
+                .attr('stroke', 'black')
+                .text(d3.format('.2f')(d[2]*100));
+            }
+        ).on('mouseout', function(d) {
+            console.log('out')
+            d3.select('#corrtext').remove();
+            d3.select(this).transition()
+            .duration(animationDuration).style('stroke', boxBorderColor)
+                          .style('stroke-width', boxBorderSize)
+                          .style('z-index', 99);
+
+            d3.selectAll('.tooltip').remove();
+            d3.selectAll('.corrlabelx').remove();
+            d3.selectAll('.corrlabely').remove();
+
+        });
+        boxes.exit().remove();
+    }
+
+    // API
+    exports.colorSchema = function(_x) {
+        if (!arguments.length) {
+            return colorSchema;
+        }
+        colorSchema = _x;
+
+        return this;
+    };
+
+    exports.height = function(_x) {
+        if (!arguments.length) {
+            return height;
+        }
+        height = _x;
+
+        return this;
+    };
+
+    exports.margin = function(_x) {
+        if (!arguments.length) {
+            return margin;
+        }
+        margin = _x;
+
+        return this;
+    };
+
+    exports.width = function(_x) {
+        if (!arguments.length) {
+            return width;
+        }
+        width = _x;
+
+        return this;
+    };
+
+    return exports;
+};
+
+labels = []
+for (i = 0; i < size1; i++) {
+        labels.push(Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 30));
+}
+
+const heatmapChart = heatmap(300, 300, '#FFFFFF',
+                             ['#ebfffc',
+                              '#C0FFE7',
+                              '#95F6D7',
+                              '#6AEDC7',
+                              '#59C3A3',
+                              '#479980'], true, labels);
+let container = d3.select('.container');
+container.datum(data).call(heatmapChart);
+
+    </script>
 </body>
 </html>
