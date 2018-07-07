@@ -39,8 +39,8 @@ function heatmap(w, h, bgColor, cSchema, haslegend, labs) {
     var labels = labs;
     const width = w;
     const height = h;
-    const boxSize_h = ((height)/labels.length) - 2;
-    const boxSize_w = ((width)/labels.length) - 2;
+    const boxSize_h = ((height)/labels.length);
+    const boxSize_w = ((width)/labels.length);
     const boxInitialColor = '#BBBBBB';
     const animationDuration = 300;
     const legend = haslegend;
@@ -48,7 +48,7 @@ function heatmap(w, h, bgColor, cSchema, haslegend, labs) {
     // Configurable properties
     let colorSchema = cSchema;
     let margin = {
-        top: 30, right: 60, bottom: 0, left: 30
+        top: 30, right: 80, bottom: 30, left: 30
     };
 
     let svg;
@@ -86,7 +86,7 @@ function heatmap(w, h, bgColor, cSchema, haslegend, labs) {
 
             for (i = 1; i < colorSchema.length - 1; i++) {
                 legend1.append('circle').classed('legendtext', true)
-                    .attr('cx', margin.left / 3 + width)
+                    .attr('cx', margin.left + width)
                     .attr('cy', 25 * i)
                     .attr('r', 4)
                     .style('opacity', 0.1)
@@ -94,12 +94,31 @@ function heatmap(w, h, bgColor, cSchema, haslegend, labs) {
 
                 legend1.append('text').text(i / (colorSchema.length - 1) * 100).classed('legendtext', true)
                     .style('opacity', 0.1)
-                    .attr('x', margin.left / 3 + width + 25)
+                    .attr('x', margin.left + width + 25)
                     .attr('y', (25 * i) + 5)
                     .attr('font-size', '14px')
                     .attr('text-anchor', 'middle')
                     .attr('dominant-baseline', 'midle');
             }
+
+            // show label on x and y axis
+            svg.append('text').text('predicted').classed('legendtext', true)
+                .attr('x', width - margin.left/2 - 10)
+                .attr('y', height + margin.top + 20)
+                .attr('font-size', '12px')
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'midle')
+                .style('opacity', 0.1);
+
+            // show label on x and y axis
+            svg.append('text').text('ground truth').classed('legendtext', true)
+                //.attr('x', width+margin.left)
+                //.attr('y', height + margin.top)
+                .attr('font-size', '12px')
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'midle')
+                .attr('transform', 'translate('+(+width+margin.left + 25)+','+(+height-margin.top)+') rotate(270)')
+                .style('opacity', 0.1);
 
             svg.on('mouseover', function(d) {
                 d3.selectAll('.legendtext').transition()
@@ -280,12 +299,30 @@ for (i = 0; i < size1; i++) {
 }
 
 const heatmapChart = heatmap(300, 300, '#FFFFFF',
-                             ['#ebfffc',
+                             /*[ // AQUA COLOR
+                              '#ebfffc',
                               '#C0FFE7',
                               '#95F6D7',
                               '#6AEDC7',
                               '#59C3A3',
-                              '#479980'], true, labels);
+                              '#479980'],*/
+                             /*[ // BLUE COLOR
+                                 '#e1ecf4',
+                                 '#a9c4e2',
+                                 '#80a7e2',
+                                 '#608bc3',
+                                 '#31599d',
+                                 '#0D429D'
+                             ],*/
+                             [ // GREEN COLOR
+                                 '#f0f9dd',
+                                 '#d4ecb6',
+                                 '#acc782',
+                                 '#96af67',
+                                 '#7E9B49',
+                                 '#5b8527'
+                             ],
+                             true, labels);
 let container = d3.select('.container');
 container.datum(data).call(heatmapChart);
 
