@@ -1,6 +1,6 @@
 # Confusion matrix in D3 js.
 
-This confusion matrix was initially from the Heart Internet - D3 with TDD Blog Post.
+This confusion matrix was initially forked from Golodhros/heart-internet-d3-tdd(and the blog Heart Internet - D3 with TDD Blog Post).
 
 ![Alt text](screen.png?raw=true "Confusion matrix")
 
