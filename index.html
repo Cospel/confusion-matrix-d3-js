@@ -101,6 +101,16 @@ function heatmap(w, h, bgColor, cSchema, haslegend, labs) {
                     .attr('dominant-baseline', 'midle');
             }
 
+            for (i = 0; i < colorSchema.length; i++) {
+                legend1.append('rect').classed('legendtext', true)
+                    .attr('x', 2 + (10 * i + i* 3))
+                    .attr('y', height + 8)
+                    .attr('width', 10)
+                    .attr('height', 10)
+                    .style('opacity', 0.1)
+                    .style('fill', colorSchema[i]);
+            }
+
             // show label on x and y axis
             svg.append('text').text('predicted').classed('legendtext', true)
                 .attr('x', width - margin.left/2 - 10)
