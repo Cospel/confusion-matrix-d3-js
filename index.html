@@ -200,7 +200,7 @@ function heatmap(w, h, bgColor, cSchema, haslegend, labs) {
             d3.select(this).moveUp();
             d3.select(this).transition()
             .duration(animationDuration).style('stroke', 'white')
-                          .style('stroke-width', boxBorderSize+5);
+                          .style('stroke-width', boxBorderSize*2);
 
             // show label on x and y axis
             svg.append('text').text(labels[d[1]]).classed('corrlabelx', true)
@@ -223,9 +223,9 @@ function heatmap(w, h, bgColor, cSchema, haslegend, labs) {
                 d3.selectAll('.tooltip').remove();
 
                 svg.append('rect').classed('tooltip', true)
-                .attr('x', x + 10 + margin.left)
+                .attr('x', x + 0 + margin.left)
                 .attr('y', y - 30 + margin.top)
-                .attr('width', 40)
+                .attr('width', 60)
                 .attr('height', 20)
                 .attr('fill', 'rgba(200, 200, 200, 0.5)')
                 .attr('stroke', 'black');
@@ -236,7 +236,7 @@ function heatmap(w, h, bgColor, cSchema, haslegend, labs) {
                 .attr('text-anchor','middle')
                 .attr('fill', 'black')
                 .attr('stroke', 'black')
-                .text(d3.format('.2f')(d[2]*100));
+                .text(d3.format('.2f')(d[2]*100) + ' %');
             }
         ).on('mouseout', function(d) {
             d3.select('#corrtext').remove();
@@ -306,22 +306,22 @@ const heatmapChart = heatmap(300, 300, '#FFFFFF',
                               '#6AEDC7',
                               '#59C3A3',
                               '#479980'],*/
-                             /*[ // BLUE COLOR
+                             [ // BLUE COLOR
                                  '#e1ecf4',
                                  '#a9c4e2',
                                  '#80a7e2',
                                  '#608bc3',
                                  '#31599d',
                                  '#0D429D'
-                             ],*/
-                             [ // GREEN COLOR
+                             ],
+                             /*[ // GREEN COLOR
                                  '#f0f9dd',
                                  '#d4ecb6',
                                  '#acc782',
                                  '#96af67',
                                  '#7E9B49',
                                  '#5b8527'
-                             ],
+                             ],*/
                              true, labels);
 let container = d3.select('.container');
 container.datum(data).call(heatmapChart);
